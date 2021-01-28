@@ -80,4 +80,10 @@ end
 
 C = CP + CI;
 
+% If CDOF is present, only have control of DoF 1.
+if nDof == 2
+    C(1,2,:) = 0; C(2,1,:) = 0;
+    C(2,2,:) = 0;
+end
+
 end

@@ -45,6 +45,10 @@ Pfh = zeros(nFreq,1);           % complex power
 Pub_f = zeros(nFreq,1);         % upper bound ('complex conjugate control')
 Omega = zeros(length(R),nFreq);
 
+% if size(Fe,1) == 2
+%     C(2,2,:) = 0;
+% end
+
 for ii = 1:nFreq
     
     Omega(:,ii) = ( Zi(:,:,ii) - C(:,:,ii) ) \ Fe(:,ii);
