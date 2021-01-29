@@ -8,11 +8,11 @@ folder = fileparts(which('waveBotComp'));
 rho = 1025;     % water density
 
 % Set scale
-scale = 4.4; % R2 = 0.88m --> scale = 1
+scale = 2.2; % R2 = 0.88m --> scale = 1
            % R2 = 2.20m --> scale = 2.2
 
 % WaveBot dimensions (in metres)
-r1 = 0.35*scale*2.5; % These are as per diagram
+r1 = 0.35*scale; % These are as per diagram
 r2 = 0.88*scale;
 t1 = 0.16*scale;
 t2 = 0.53*scale;
@@ -43,7 +43,7 @@ vol_truncCone = pi*((1/3)*(r2^2 + r1*r2 + r1^2)*(t2-t1));
 vol_total = vol_cyl + vol_truncCone;
 
 % Case 2) - WaveBot with a Compressible Degree Of Freedom (CDOF) defined over its base
-fdComp_CDOF = waveBotComp(rho, h, T, r1, r2, t1, t2, t3, 'motions', [0 0 1 0 0 0 1], 'cdofVol',vol_total*40);
+fdComp_CDOF = waveBotComp(rho, h, T, r1, r2, t1, t2, t3, 'motions', [0 0 1 0 0 0 1], 'cdofVol',vol_total*15);
 
 % Plot heave motions
 motions_Rigid = fdComp_Rigid.Motions;
@@ -71,5 +71,5 @@ legend('Rigid','with CDOF')
 xlabel('Period (s)');
 ylabel('Power RAO (kW/m^2)')
 
-save('C:\Users\AlfredCotten\Desktop\MATLAB\Studies\SNL-CDOF\data\waveBot_r2.20_CDOF.mat','fdComp_Rigid','fdComp_CDOF')
+save('C:\Users\AlfredCotten\Desktop\MATLAB\snl_fbWecCntrlFork_CDOF\CDOF\data\waveBot_r2.20_CDOF.mat','fdComp_Rigid','fdComp_CDOF')
 
