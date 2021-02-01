@@ -135,7 +135,7 @@ if compHb && compArray
 end  
 
 % Set fundamental constants for use in computing the extra stiffness of the compressible DOF 
-pAtm = 101325; % Atmospheric pressure(in Pascals)
+pAtm = 101325; % Atmospheric pressure (in Pascals)
 adInd = 1.4; % Adiabatic index for air
 g = 9.80665; % gravitational acceleration
 

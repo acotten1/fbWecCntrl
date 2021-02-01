@@ -82,10 +82,11 @@ N = options.N;
 
 %% Wave spectrum and excitation
 
-% amplitude spectrum
-dw = S.w(2) - S.w(1);
-ampSpect = transpose(sqrt(2*S.S*dw));
-
+% % amplitude spectrum
+% dw = S.w(2) - S.w(1);
+% ampSpect = transpose(sqrt(2*S.S*dw));
+% 
+ampSpect = S.S; % For regular waves, some amplitude must be set here
 % complex excitation spectrum
 Fe = Hex .* ampSpect;
 

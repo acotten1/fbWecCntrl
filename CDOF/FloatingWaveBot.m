@@ -53,6 +53,7 @@ classdef FloatingWaveBot < FloatingBody
             fb.r2 = r2;
             fb.t1 = t1;
             fb.t2 = t2;
+            fb.t3 = t3;
             
             if (~isempty(varargin))
                 if (length(varargin) < 3)
