@@ -10,18 +10,71 @@ r = 0.88;
 mfile_name = sprintf('waveBot_r%.2f_CDOF.mat',r);
 load(fullfile('data',mfile_name))
 
+% load('cylinder1000m3CVolVerifCase_CDOF.mat')
+% warning('off','MATLAB:singularMatrix') % These warnings can slow things down for cylinder case, but don't seem to impact results.
+% warning('off','MATLAB:nearlySingularMatrix')
+
 fdComp = fdComp_Rigid;
 T = fdComp.T;
 f = 1./T;
 w = 2*pi*f;
 
-%% Create intrinsic impedance and excitation force matrices/vectors
-Zi_rigid = shiftdim(fdComp.B + 1i * ( w .* (fdComp.A + fdComp.M) - (fdComp.C+fdComp.K) ./ w),-2);
-Hex_rigid = transpose(fdComp.Fex);
+%% Choose options (to allow experimentation with the parameters)
+opt = 1; % 1 - use full WAMIT results from already loaded file
+         % 2 - use stiffness due to compressibility (just K) from second design 
+         % 3 - use hydrostatics (C and K) for CDOF from second design
+         % 4 - use hydrodynamics (A, B and Fex) for CDOF from second design  
+         % 5 - use full WAMIT results of second design
 
-M = shiftdim(repmat(fdComp_CDOF.M,1,1,length(w)),2); C = shiftdim(repmat(fdComp_CDOF.C,1,1,length(w)),2); K = shiftdim(repmat(fdComp_CDOF.K,1,1,length(w)),2);
-Zi_cdof = shiftdim(fdComp_CDOF.B + 1i * ( repmat(w,1,fdComp_CDOF.DoF,fdComp_CDOF.DoF) .* (fdComp_CDOF.A + M) - (C+K) ./ repmat(w,1,fdComp_CDOF.DoF,fdComp_CDOF.DoF)),1);
-Hex_cdof = transpose(squeeze(fdComp_CDOF.Fex));
+%% Create intrinsic impedance and excitation force matrices/vectors
+if opt > 1 % Select the second WAMIT run from which to import various quantities for the forces (these should be named 'fdComp_CDOF2' and 'fdComp_Rigid2'.
+    load('C:\Users\AlfredCotten\Mocean Energy LTD\CDOF - Documents\Results\WaveBot results\Manually changing parameters study\Case 2 - WaveBot with small radius doubled\fdCompData.mat')
+end
+
+if opt == 1
+    Zi_rigid = shiftdim(fdComp.B + 1i * ( w .* (fdComp.A + fdComp.M) - (fdComp.C + fdComp.K) ./ w),-2);
+    Hex_rigid = transpose(fdComp.Fex);
+    
+    M = shiftdim(repmat(fdComp_CDOF.M,1,1,length(w)),2); C = shiftdim(repmat(fdComp_CDOF.C,1,1,length(w)),2); K = shiftdim(repmat(fdComp_CDOF.K,1,1,length(w)),2);
+    Zi_cdof = shiftdim(fdComp_CDOF.B + 1i * ( repmat(w,1,fdComp_CDOF.DoF,fdComp_CDOF.DoF) .* (fdComp_CDOF.A + M) - (C + K) ./ repmat(w,1,fdComp_CDOF.DoF,fdComp_CDOF.DoF)),1);
+    Hex_cdof = transpose(squeeze(fdComp_CDOF.Fex));
+elseif opt == 2
+    Zi_rigid = shiftdim(fdComp.B + 1i * ( w .* (fdComp.A + fdComp.M) - (fdComp.C+fdComp_Rigid2.K) ./ w),-2);
+    Hex_rigid = transpose(fdComp.Fex);
+    
+    M = shiftdim(repmat(fdComp_CDOF.M,1,1,length(w)),2); C = shiftdim(repmat(fdComp_CDOF.C,1,1,length(w)),2); K = shiftdim(repmat(fdComp_CDOF2.K,1,1,length(w)),2);
+    Zi_cdof = shiftdim(fdComp_CDOF.B + 1i * ( repmat(w,1,fdComp_CDOF.DoF,fdComp_CDOF.DoF) .* (fdComp_CDOF.A + M) - (C + K) ./ repmat(w,1,fdComp_CDOF.DoF,fdComp_CDOF.DoF)),1);
+    Hex_cdof = transpose(squeeze(fdComp_CDOF.Fex));
+elseif opt == 3
+    Zi_rigid = shiftdim(fdComp.B + 1i * ( w .* (fdComp.A + fdComp.M) - (fdComp_Rigid2.C + fdComp_Rigid2.K) ./ w),-2);
+    Hex_rigid = transpose(fdComp.Fex);
+    
+    Ctemp = fdComp_CDOF2.C; Ctemp(1,1) = fdComp_CDOF.C(1,1); % Only DoF pairings involving at least one CDOF index should be changed
+    M = shiftdim(repmat(fdComp_CDOF.M,1,1,length(w)),2); C = shiftdim(repmat(Ctemp,1,1,length(w)),2); K = shiftdim(repmat(fdComp_CDOF2.K,1,1,length(w)),2);
+    Zi_cdof = shiftdim(fdComp_CDOF.B + 1i * ( repmat(w,1,fdComp_CDOF.DoF,fdComp_CDOF.DoF) .* (fdComp_CDOF.A + M) - (C + K) ./ repmat(w,1,fdComp_CDOF.DoF,fdComp_CDOF.DoF)),1);
+    Hex_cdof = transpose(squeeze(fdComp_CDOF.Fex));
+elseif opt == 4
+    Zi_rigid = shiftdim(fdComp_Rigid2.B + 1i * ( w .* (fdComp_Rigid2.A + fdComp_Rigid.M) - (fdComp.C + fdComp.K) ./ w),-2);
+    Hex_rigid = transpose(fdComp_Rigid2.Fex);
+    
+    Atemp = fdComp_CDOF2.A; 
+    Atemp(:,1,1) = fdComp_CDOF.A(:,1,1); % Only DoF pairings involving at least one CDOF index should be changed
+    Btemp = fdComp_CDOF2.B; 
+    Btemp(:,1,1) = fdComp_CDOF.B(:,1,1); % Only DoF pairings involving at least one CDOF index should be changed
+    Fextemp = fdComp_CDOF2.Fex; 
+    Fextemp(:,1,1) = fdComp_CDOF.Fex(:,1,1); % Only DoF pairings involving at least one CDOF index should be changed
+    M = shiftdim(repmat(fdComp_CDOF.M,1,1,length(w)),2); C = shiftdim(repmat(fdComp_CDOF.C,1,1,length(w)),2); K = shiftdim(repmat(fdComp_CDOF.K,1,1,length(w)),2);
+    Zi_cdof = shiftdim(Btemp + 1i * ( repmat(w,1,fdComp_CDOF.DoF,fdComp_CDOF.DoF) .* (Atemp + M) - (C + K) ./ repmat(w,1,fdComp_CDOF.DoF,fdComp_CDOF.DoF)),1);
+    Hex_cdof = transpose(squeeze(Fextemp));
+elseif opt == 5
+    fdComp = fdComp_Rigid2; fdComp_CDOF = fdComp_CDOF2;
+    Zi_rigid = shiftdim(fdComp.B + 1i * ( w .* (fdComp.A + fdComp.M) - (fdComp.C + fdComp.K) ./ w),-2);
+    Hex_rigid = transpose(fdComp.Fex);
+    
+    M = shiftdim(repmat(fdComp_CDOF.M,1,1,length(w)),2); C = shiftdim(repmat(fdComp_CDOF.C,1,1,length(w)),2); K = shiftdim(repmat(fdComp_CDOF.K,1,1,length(w)),2);
+    Zi_cdof = shiftdim(fdComp_CDOF.B + 1i * ( repmat(w,1,fdComp_CDOF.DoF,fdComp_CDOF.DoF) .* (fdComp_CDOF.A + M) - (C + K) ./ repmat(w,1,fdComp_CDOF.DoF,fdComp_CDOF.DoF)),1);
+    Hex_cdof = transpose(squeeze(fdComp_CDOF.Fex));
+end
 
 % Make test plots for cases with and without the CDOF
 figure; grid on; hold on;

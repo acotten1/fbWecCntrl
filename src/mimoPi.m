@@ -80,7 +80,10 @@ end
 
 C = CP + CI;
 
-% If CDOF is present, may only have control of DoF 1.
+% If CDOF is present, either have control of just DoF 1 - PTO extracting power through motion of main body relative to fixed reference frame ('external PTO');
+                            % or control of just DoF 2 - PTO extraction power through relative motion between main body and CDOF ('on-board PTO').
+                            % For now, the user will need to make sure the
+                            % below line is set to zero the appropriate elements of the C matrix. 
 if nDof == 2
     C(1,2,:) = 0; C(2,1,:) = 0;
     C(2,2,:) = 0;
