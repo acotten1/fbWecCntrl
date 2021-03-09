@@ -46,9 +46,9 @@ end
 dpto = FroudeScale.DampingRotational(0.1,2*10^5);
 
 %% 0.2) Create frequency domain compuations for WaveBot with and without CDOF
-h = 5;         % water depth
+h = 5*scale;         % water depth
 T = FroudeScale.Time(0.1,2:0.1:16);    % wave periods
-T = 1./[0.25:0.005:0.8];
+T = FroudeScale.Time(scale,1./[0.25:0.005:0.8]);
 
 % Case 1) - Rigid body
 fdComp_Rigid = waveBotComp(rho, h, T, r1, r2, t1, t2, t3, 'motions', [0 0 1 0 0 0]);
@@ -162,3 +162,68 @@ fresRB = wresRB/(2*pi);
 [val ind] = min(abs(fresRB - f)); % 
 fresRB(ind)
 
+
+
+% %% 
+% %%% S2 allowed to vary %%%
+% x = 0.53; %T2
+% A33 = 1500; 
+% S2 = 0:0.02:10; 
+% n=10; 
+% yrb = sqrt(1025*9.81./(1025*x+A33./S2)); 
+% ycdof = sqrt(1025*9.81*1.4*(101325+1025*9.81.*x)./((1025*x+A33./S2)*1.4.*(101325+1025*9.81.*x)+1025^2*9.81*n*x.^2));
+% 
+% figure;plot(S2,yrb,S2,ycdof);legend('RB','CDOF');xlabel('S2');ylabel('wres')
+% figure;plot(S2,yrb-ycdof);xlabel('S2');ylabel('wresRB-wCDOF')
+% 
+% % Allow S2 to vary with full eqn
+% S2 = 0:0.02:10; S1 = S2;
+% t2 = 0.53;
+% 
+% for i = 1:length(S2)
+% a = (fdComp_CDOF.M(1,1)+fdComp_CDOF.A(:,1,1)).*fdComp_CDOF.A(:,2,2) - fdComp_CDOF.A(:,1,2).^2;
+% b = -((fdComp_CDOF.M(1,1)+fdComp_CDOF.A(:,1,1)).*(rho*g*S1(i) + S1(i)^2*adInd*(pAtm + rho*g*t2)/cdofVol) + rho*g*S2(i)*fdComp_CDOF.A(:,2,2) + fdComp_CDOF.B(:,1,1).*fdComp_CDOF.B(:,2,2) ...
+%     - 2*rho*g*S1(i)*fdComp_CDOF.A(:,1,2) - fdComp_CDOF.B(:,1,2).^2);
+% c = rho*g*S1(i)*(rho*g*S2(i) - rho*g*S1(i)) + rho*g*S2(i)*S1(i)^2*adInd.*(pAtm + rho*g*t2)/cdofVol;
+% wresSquared = (- b - sqrt(b.^2 - 4*a*c))./(2*a); % Solve for omega squared (smallest of the two solutions is of interest here)
+% wres = sqrt(wresSquared); % Only positive solution is of interest here
+% fres = wres/(2*pi);
+% [val ind] = min(abs(fres - f)); % 
+% ycdofFull(i) = fres(ind);
+% end
+% 
+% figure;plot(S2,yrb,S2,ycdofFull);legend('RB','CDOF');xlabel('S2');ylabel('wres')
+% figure;plot(S2,yrb-ycdofFull);xlabel('S2');ylabel('wresRB-wCDOF')
+% 
+% %%% T2 allowed to vary %%%
+% x = 0:0.02:100; %T2
+% A33 = 1500;
+% S2 = 2.4328;
+% n = 10; 
+% yrb = sqrt(1025*9.81./(1025*x+A33/S2)); 
+% ycdof = sqrt(1025*9.81*1.4*(101325+1025*9.81.*x)./((1025*x+A33/S2)*1.4.*(101325+1025*9.81.*x)+1025^2*9.81*n*x.^2));
+% 
+% figure;plot(x,yrb,x,ycdof);legend('RB','CDOF');xlabel('T2');ylabel('wres')
+% figure;plot(x,yrb-ycdof);xlabel('T2');ylabel('wresRB-wCDOF')
+% 
+% % Allow T2 to vary with full eqn
+% t2 = 0:0.02:100;
+% S2 = 2.4328; S1 = S2;
+% 
+% for i = 1:length(t2)
+% a = (fdComp_CDOF.M(1,1)+fdComp_CDOF.A(:,1,1)).*fdComp_CDOF.A(:,2,2) - fdComp_CDOF.A(:,1,2).^2;
+% b = -((fdComp_CDOF.M(1,1)+fdComp_CDOF.A(:,1,1)).*(rho*g*S1 + S1^2*adInd*(pAtm + rho*g*t2(i))/cdofVol) + rho*g*S2*fdComp_CDOF.A(:,2,2) + fdComp_CDOF.B(:,1,1).*fdComp_CDOF.B(:,2,2) ...
+%     - 2*rho*g*S1*fdComp_CDOF.A(:,1,2) - fdComp_CDOF.B(:,1,2).^2);
+% c = rho*g*S1*(rho*g*S2 - rho*g*S1) + rho*g*S2*S1^2*adInd.*(pAtm + rho*g*t2(i))/cdofVol;
+% wresSquared = (- b - sqrt(b.^2 - 4*a*c))./(2*a); % Solve for omega squared (smallest of the two solutions is of interest here)
+% wres = sqrt(wresSquared); % Only positive solution is of interest here
+% fres = wres/(2*pi);
+% [val ind] = min(abs(fres - f)); % 
+% ycdofFull(i) = fres(ind);
+% end
+% 
+% figure;plot(t2,yrb,t2,ycdofFull);legend('RB','CDOF');xlabel('T2');ylabel('wres')
+% figure;plot(t2,yrb-ycdofFull);xlabel('T2');ylabel('wresRB-wCDOF')
+% 
+% 
+% 

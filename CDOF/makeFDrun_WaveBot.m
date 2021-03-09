@@ -46,7 +46,7 @@ elseif opt == 2
     Zi_cdof = shiftdim(fdComp_CDOF.B + 1i * ( repmat(w,1,fdComp_CDOF.DoF,fdComp_CDOF.DoF) .* (fdComp_CDOF.A + M) - (C + K) ./ repmat(w,1,fdComp_CDOF.DoF,fdComp_CDOF.DoF)),1);
     Hex_cdof = transpose(squeeze(fdComp_CDOF.Fex));
 elseif opt == 3
-    Zi_rigid = shiftdim(fdComp.B + 1i * ( w .* (fdComp.A + fdComp.M) - (fdComp_Rigid2.C + fdComp_Rigid2.K) ./ w),-2);
+    Zi_rigid = shiftdim(fdComp.B + 1i * ( w .* (fdComp.A + fdComp.M) - (fdComp.C + fdComp.K) ./ w),-2);
     Hex_rigid = transpose(fdComp.Fex);
     
     Ctemp = fdComp_CDOF2.C; Ctemp(1,1) = fdComp_CDOF.C(1,1); % Only DoF pairings involving at least one CDOF index should be changed
@@ -54,8 +54,8 @@ elseif opt == 3
     Zi_cdof = shiftdim(fdComp_CDOF.B + 1i * ( repmat(w,1,fdComp_CDOF.DoF,fdComp_CDOF.DoF) .* (fdComp_CDOF.A + M) - (C + K) ./ repmat(w,1,fdComp_CDOF.DoF,fdComp_CDOF.DoF)),1);
     Hex_cdof = transpose(squeeze(fdComp_CDOF.Fex));
 elseif opt == 4
-    Zi_rigid = shiftdim(fdComp_Rigid2.B + 1i * ( w .* (fdComp_Rigid2.A + fdComp_Rigid.M) - (fdComp.C + fdComp.K) ./ w),-2);
-    Hex_rigid = transpose(fdComp_Rigid2.Fex);
+    Zi_rigid = shiftdim(fdComp.B + 1i * ( w .* (fdComp.A + fdComp.M) - (fdComp.C + fdComp.K) ./ w),-2);
+    Hex_rigid = transpose(fdComp.Fex);
     
     Atemp = fdComp_CDOF2.A; 
     Atemp(:,1,1) = fdComp_CDOF.A(:,1,1); % Only DoF pairings involving at least one CDOF index should be changed
